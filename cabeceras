@@ -1,0 +1,327 @@
+#ifndef CABECERAS_INCLUDED
+#define CABECERAS_INCLUDED
+
+#include "opencv2/imgproc.hpp"
+#include "opencv2/videoio.hpp"
+#include "opencv2/highgui.hpp"
+#include "opencv2/objdetect.hpp"
+#include "opencv2/opencv.hpp"
+
+#include <iostream>
+#include <stdio.h>
+#include<fstream>
+
+#include "domen.h"
+#include "re.h"
+#include "mi.h"
+#include "fa.h"
+#include "sol.h"
+#include "la.h"
+#include "si.h"
+#include "domay.h"
+
+#include <string>
+#include <vector>
+
+using namespace std;
+using namespace cv;
+using namespace gam;
+
+String face_cascade_name = "dependencias/lbpcascade_frontalface.xml";
+CascadeClassifier face_cascade;
+
+String eyes_cascade_name = "dependencias/haarcascade_eye_tree_eyeglasses.xml";
+CascadeClassifier eyes_cascade;
+
+
+/** Function Headers */
+Mat Morph(int erosion_size, int dilation_size, Mat src );
+Mat quitafondo(Mat frame, vector<Mat> fondo);
+Mat aplica_mascara(Mat frame, Mat mascara);
+int dibuja_centro(Mat src, Mat dst);
+void mejora_contours(Mat src, vector<vector<Point> > contours, vector<Vec4i> hierarchy);
+void selector_nota(int posX, Mat Frame_usado,Mat Frame_pacolocar_vol);
+void cambia_vol(Mat Frame_usado);
+int rectangulito_area(Mat frame, Mat dst);
+
+
+
+/** detector de caras */
+void detectAndDisplay( Mat frame, Mat frame_out );
+
+/** las notas, se dejan como variables globales */
+domen ejemplo;
+re ejemplo1;
+mi ejemplo23;
+fa ejemplo33;
+sol ejemplo43;
+la ejemplo53;
+si ejemplo63;
+domay ejemplo73;
+
+
+int anterior=32;
+bool first_time=true;
+
+
+
+void mejora_contours(Mat src, vector<vector<Point> > contours, vector<Vec4i> hierarchy)
+{
+  findContours( src, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+  //int s = findBiggestContour(contours);
+  //Mat drawing = Mat::zeros( src.size(), CV_8UC1 );
+  for( int i = 0; i< contours.size(); i++ )
+     {
+       drawContours( src, contours, i, Scalar(255), -1, 8, hierarchy, 0, Point() );
+     }
+  //drawContours( drawing, contours, s, Scalar(255), -1, 8, hierarchy, 0, Point() );
+  //return drawing;
+}
+
+Mat Morph(int eros, int dil, Mat src )
+{
+  Mat element = getStructuringElement( MORPH_ELLIPSE,
+                       Size( 2*eros + 1, 2*eros+1 ),
+                       Point( eros, eros ) );
+  erode( src, src, element );
+
+  element = getStructuringElement( MORPH_ELLIPSE,
+                       Size( 2*dil + 1, 2*dil+1 ),
+                       Point( dil, dil ) );
+  dilate( src, src, element );
+
+  return src;
+}
+
+
+Mat quitafondo(Mat frame, vector<Mat> fondo)
+{
+   vector<Mat> spl_frame;
+   Mat motion0,motion1,motion2, junta, nocolor;
+
+   cvtColor(frame, nocolor, COLOR_BGR2YCrCb);
+   split(nocolor, spl_frame);
+
+   absdiff(spl_frame[0], fondo[0], motion0);
+   absdiff(spl_frame[1], fondo[1], motion1);
+   absdiff(spl_frame[2], fondo[2], motion2);
+   threshold(motion0, motion0, 20, 255, cv::THRESH_BINARY | cv::THRESH_OTSU );
+   threshold(motion1, motion1, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+   threshold(motion2, motion2, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+
+	motion0=Morph(2, 10, motion0);
+	motion1=Morph(4, 9,  motion1);
+	motion2=Morph(4, 21, motion2);
+
+   bitwise_or(motion0,motion1,junta);
+   bitwise_or(junta,motion2,junta);
+
+   return junta;
+
+}
+
+Mat aplica_mascara(Mat frame, Mat mascara)		//usarlo para el frame actual y alguna mascara
+{
+    Mat hsv, junta;
+    vector<Mat> bgr;
+    cvtColor(frame, hsv, CV_BGR2HSV);					//cambia al espacio de color HSV
+    split(frame,bgr);							//split source
+
+    bitwise_and(bgr[0],mascara,bgr[0]);					//junta el filtrado con la imagen
+    bitwise_and(bgr[1],mascara,bgr[1]);
+    bitwise_and(bgr[2],mascara,bgr[2]);
+
+    merge(bgr,junta);						//queda una imagen solo con lo filtrado
+    //bitwise_and(bgr[0],bgr[1], junta);
+    //bitwise_and(bgr[2],junta,junta);
+    return junta;
+
+}
+
+void detectAndDisplay( Mat frame, Mat frame_out )
+{
+    vector<Rect> faces;
+    Mat frame_gray;
+
+    cvtColor( frame, frame_gray, COLOR_BGR2GRAY );
+    equalizeHist( frame_gray, frame_gray );
+
+    //Detector de caras
+    face_cascade.detectMultiScale( frame_gray, faces, 1.1, 2, 0, Size(100, 100) );
+    rectangle(frame_out, Point (0,0), Point (1200,80), Scalar(0,0,0), -2, 8, 0);
+
+    for( size_t i = 0; i < faces.size(); i++ )
+    {
+        Mat faceROI = frame_gray( faces[i] );
+        vector<Rect> eyes;
+
+
+        // en cada cara, detectar ojos
+            eyes_cascade.detectMultiScale( faceROI, eyes, 1.1, 2, 0 |CASCADE_SCALE_IMAGE, Size(30, 30) );
+            if( eyes.size() == 2)
+            {
+
+                int x = faces[i].x;
+                int y = faces[i].y;
+                int h = 1.3*y+faces[i].height;
+                int w = x+faces[i].width;
+                rectangle(frame_out, Point (x,y), Point (w,h), Scalar(0,0,0), -2, 8, 0);
+                //circle(frame,Point(x,y),1,Scalar( 255, 0, 255 ), 3, 8, 0 );
+                }
+    }
+}
+
+int dibuja_centro(Mat src,Mat dst)
+{
+// Mat src ttiene que ser una de las mascaras, de lo contrario esta funcion no sirve
+    int posX = 0, posY =0;
+    Moments oMoments = moments(src);
+    //"las barritas"
+    double dM01 = oMoments.m01;
+    double dM10 = oMoments.m10;
+    double dArea = oMoments.m00;
+
+    posX = dM10 / dArea;
+    posY = dM01 / dArea;
+
+
+    circle(dst, Point(posX , posY ), 6, Scalar(0, 0, 255), 2, 8, 0);
+
+   /**** coloca la separacion solo para ayuda visual*/
+
+    /*
+   for(int i=1;i<10;i++){
+        int pt1= (dst.cols/10)*i;
+        line(dst, Point(pt1,0),Point(pt1,dst.rows),Scalar(0,0,0),1,LINE_AA);
+   }
+    */
+
+
+
+
+return posX;
+}
+
+void selector_nota(int posX,Mat Frame_usado,Mat Frame_pacolocar_vol){
+
+    Moments oMoments = moments(Frame_usado);
+    double dArea = oMoments.m00;
+
+    double sw_case=posX/(double(Frame_usado.cols));
+    sw_case=sw_case*8;
+
+
+    if(dArea<(7.8e7*0.09)){
+        sw_case=10;
+    }
+
+    //toma el sw_case y lo pasa a int
+    int sw_case2=sw_case;
+
+
+
+    // rpimera vez??????
+    if( first_time){
+        anterior=sw_case2;
+        first_time=false;
+    }
+    //calculos para el vol
+    float num_vol=rectangulito_area(Frame_usado,Frame_pacolocar_vol);
+
+    if (sw_case2 != anterior){
+
+            switch(anterior){
+            case 1: ejemplo.quiet(); break;
+            case 2: ejemplo1.quiet(); break;
+            case 3: ejemplo23.quiet(); break;
+            case 4: ejemplo33.quiet(); break;
+            case 5: ejemplo43.quiet(); break;
+            case 6: ejemplo53.quiet(); break;
+            case 7: ejemplo63.quiet(); break;
+            case 8: ejemplo73.quiet(); break;
+            case 10:
+            ejemplo.quiet();
+            ejemplo1.quiet();
+            ejemplo23.quiet();
+            ejemplo33.quiet();
+            ejemplo43.quiet();
+            ejemplo53.quiet();
+            ejemplo63.quiet();
+            ejemplo73.quiet(); break;
+
+            }
+
+
+    switch(sw_case2){
+
+        case 1: ejemplo.set_mult(num_vol); ejemplo.start3(); break;
+        case 2: ejemplo1.set_mult(num_vol); ejemplo1.start3(); break;
+        case 3: ejemplo23.set_mult(num_vol); ejemplo23.start3(); break;
+        case 4: ejemplo33.set_mult(num_vol); ejemplo33.start3(); break;
+        case 5: ejemplo43.set_mult(num_vol); ejemplo43.start3(); break;
+        case 6: ejemplo53.set_mult(num_vol); ejemplo53.start3(); break;
+        case 7: ejemplo63.set_mult(num_vol); ejemplo63.start3(); break;
+        case 8: ejemplo73.set_mult(num_vol); ejemplo73.start3(); break;
+        case 10:
+            ejemplo.quiet();
+            ejemplo1.quiet();
+            ejemplo23.quiet();
+            ejemplo33.quiet();
+            ejemplo43.quiet();
+            ejemplo53.quiet();
+            ejemplo63.quiet();
+            ejemplo73.quiet(); break;
+    }
+    }
+
+    anterior=sw_case2;
+
+
+
+
+}
+
+
+
+int rectangulito_area(Mat frame, Mat frame_final){
+
+
+      vector<vector<Point> > contoursA;
+      vector<Vec4i> hierarchyA;
+      findContours(frame, contoursA, hierarchyA, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
+
+      size_t largestContour = 0;
+      for (size_t i = 1; i < contoursA.size(); i++)
+      {
+          if (contourArea(contoursA[i]) > contourArea(contoursA[largestContour]))
+              largestContour = i;
+      }
+
+      Rect boundingBox;
+
+      if (!contoursA.empty())
+      {
+            boundingBox = boundingRect(contoursA[largestContour]);
+            //rectangle(frame_final, boundingBox, Scalar(255, 255, 255));
+      }
+
+      //colocamos el valor del volumen en la imagen para ayuda visual
+      ostringstream strs, strs2;
+      strs << boundingBox.width*boundingBox.height/22000;
+      string str = strs.str();
+
+      putText(frame_final, str, Point2f(100,100), FONT_HERSHEY_PLAIN, 2,  Scalar(0,0,255), 2);
+
+
+      return boundingBox.width*boundingBox.height/20000;
+
+
+
+
+
+
+}
+
+
+
+#endif // CABECERAS_INCLUDED
