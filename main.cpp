@@ -8,14 +8,14 @@ using namespace gam;
 int main(int argc, char** argv)
 {
 
-ejemplo.initAudio(5100);
-ejemplo1.initAudio(5100);
-ejemplo23.initAudio(5100);
-ejemplo33.initAudio(5100);
-ejemplo43.initAudio(5100);
-ejemplo53.initAudio(5100);
-ejemplo63.initAudio(5100);
-ejemplo73.initAudio(5100);
+do_ej.initAudio(5100);
+re_ej.initAudio(5100);
+mi_ej.initAudio(5100);
+fa_ej.initAudio(5100);
+sol_ej.initAudio(5100);
+la_ej.initAudio(5100);
+si_ej.initAudio(5100);
+dom_ej.initAudio(5100);
 
 
     VideoCapture cap(0);
