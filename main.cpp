@@ -78,7 +78,7 @@ for(;;)
 
 
 
-        char keycode = (char)waitKey(30);
+        char keycode = (char)waitKey(30);       //press 'esc' to end
         if( keycode == 27 )
             break;
 
