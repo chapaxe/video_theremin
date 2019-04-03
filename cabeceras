@@ -50,14 +50,14 @@ int rectangulito_area(Mat frame, Mat dst);
 void detectAndDisplay( Mat frame, Mat frame_out );
 
 /** las notas, se dejan como variables globales */
-domen ejemplo;
-re ejemplo1;
-mi ejemplo23;
-fa ejemplo33;
-sol ejemplo43;
-la ejemplo53;
-si ejemplo63;
-domay ejemplo73;
+domen do_ej;
+re re_ej;
+mi mi_ej;
+fa fa_ej;
+sol sol_ej;
+la la_ej;
+si si_ej3;
+domay dom_ej;
 
 
 int anterior=32;
@@ -231,46 +231,46 @@ void selector_nota(int posX,Mat Frame_usado,Mat Frame_pacolocar_vol){
     if (sw_case2 != anterior){
 
             switch(anterior){
-            case 1: ejemplo.quiet(); break;
-            case 2: ejemplo1.quiet(); break;
-            case 3: ejemplo23.quiet(); break;
-            case 4: ejemplo33.quiet(); break;
-            case 5: ejemplo43.quiet(); break;
-            case 6: ejemplo53.quiet(); break;
-            case 7: ejemplo63.quiet(); break;
-            case 8: ejemplo73.quiet(); break;
+            case 1: do_ej.quiet(); break;
+            case 2: re_ej.quiet(); break;
+            case 3: mi_ej.quiet(); break;
+            case 4: fa_ej.quiet(); break;
+            case 5: sol_ej.quiet(); break;
+            case 6: la_ej.quiet(); break;
+            case 7: si_ej.quiet(); break;
+            case 8: dom_ej.quiet(); break;
             case 10:
-            ejemplo.quiet();
-            ejemplo1.quiet();
-            ejemplo23.quiet();
-            ejemplo33.quiet();
-            ejemplo43.quiet();
-            ejemplo53.quiet();
-            ejemplo63.quiet();
-            ejemplo73.quiet(); break;
+            do_ej.quiet();
+            re_ej.quiet();
+            mi_ej.quiet();
+            fa_ej.quiet();
+            sol_ej.quiet();
+            la_ej.quiet();
+            si_ej.quiet();
+            dom_ej.quiet(); break;
 
             }
 
 
     switch(sw_case2){
 
-        case 1: ejemplo.set_mult(num_vol); ejemplo.start3(); break;
-        case 2: ejemplo1.set_mult(num_vol); ejemplo1.start3(); break;
-        case 3: ejemplo23.set_mult(num_vol); ejemplo23.start3(); break;
-        case 4: ejemplo33.set_mult(num_vol); ejemplo33.start3(); break;
-        case 5: ejemplo43.set_mult(num_vol); ejemplo43.start3(); break;
-        case 6: ejemplo53.set_mult(num_vol); ejemplo53.start3(); break;
-        case 7: ejemplo63.set_mult(num_vol); ejemplo63.start3(); break;
-        case 8: ejemplo73.set_mult(num_vol); ejemplo73.start3(); break;
+        case 1: do_ej.set_mult(num_vol); do_ej.start3(); break;
+        case 2: re_ej.set_mult(num_vol); re_ej.start3(); break;
+        case 3: mi_ej.set_mult(num_vol); mi_ej.start3(); break;
+        case 4: fa_ej.set_mult(num_vol); fa_ej.start3(); break;
+        case 5: sol_ej.set_mult(num_vol); sol_ej.start3(); break;
+        case 6: la_ej.set_mult(num_vol); la_ej.start3(); break;
+        case 7: si_ej.set_mult(num_vol); si_ej.start3(); break;
+        case 8: dom_ej.set_mult(num_vol); dom_ej.start3(); break;
         case 10:
-            ejemplo.quiet();
-            ejemplo1.quiet();
-            ejemplo23.quiet();
-            ejemplo33.quiet();
-            ejemplo43.quiet();
-            ejemplo53.quiet();
-            ejemplo63.quiet();
-            ejemplo73.quiet(); break;
+            do_ej.quiet();
+            re_ej.quiet();
+            mi_ej.quiet();
+            fa_ej.quiet();
+            sol_ej.quiet();
+            la_ej.quiet();
+            si_ej.quiet();
+            dom_ej.quiet(); break;
     }
     }
 
